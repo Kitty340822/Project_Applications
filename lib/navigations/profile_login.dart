@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../views/welcome.dart';
 
 void main() {
-  runApp(const Profile());
+  runApp(const Profile_login());
 }
 
-class Profile extends StatelessWidget {
-  const Profile({super.key});
+class Profile_login extends StatelessWidget {
+  const Profile_login({super.key});
 
   @override
   Widget build(BuildContext context) {

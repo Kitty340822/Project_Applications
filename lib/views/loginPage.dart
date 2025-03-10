@@ -1,7 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:projectapp/navigations/profile_login.dart';
+import 'package:projectapp/navigations/tabbar.dart';
+import 'package:projectapp/views/homePage.dart';
 import '../components/my_textfield.dart';
 import 'package:projectapp/components/my_button.dart' as btn;
+import './profile.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -97,6 +101,8 @@ class LoginPage extends StatelessWidget {
                               onTap: () {
                                 if (_formKey.currentState!.validate()) {
                                   print('valid');
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => Profile())
+                                );
                                 } else {
                                   print('not valid');
                                 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:projectapp/navigations/profile_login.dart';
 import 'package:projectapp/views/homePage.dart';
 import 'package:projectapp/views/library.dart';
-import 'package:projectapp/views/profile.dart';
+import 'package:projectapp/views/album_view.dart';
 import 'package:projectapp/views/search.dart';
 
 class Tabbar extends StatefulWidget {
@@ -18,7 +18,7 @@ class _TabbarState extends State<Tabbar> {
     Homepage(),
     SearchView(),
     LibraryView(),
-    Profile(),
+    Profile_login(),
   ];
 
   @override

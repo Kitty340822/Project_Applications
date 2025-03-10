@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/album_card.dart';
 import '../widgets/song_card.dart';
-
+import './album_view.dart';
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
@@ -69,41 +69,76 @@ class _HomepageState extends State<Homepage> {
                       padding: EdgeInsets.all(20),
                       child: Row(
                         children: [
-                          AlbumCard(
-                            label: "Best mode",
-                            image: AssetImage("assets/album01.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AlbumView(),
+                                ),
+                              );
+                            },
+                            child: AlbumCard(
+                              label: "Best mode",
+                              image: AssetImage("assets/album01.jpg"),
+                            ),
                           ),
                           SizedBox(width: 20),
-                          AlbumCard(
-                            label: "Love <3",
-                            image: AssetImage("assets/album02.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumView()));
+                            },
+                            child: AlbumCard(
+                              label: "Love <3",
+                              image: AssetImage("assets/album02.jpg"),
+                            ),
                           ),
                           SizedBox(width: 20),
-                          AlbumCard(
-                            label: "Away",
-                            image: AssetImage("assets/album03.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumView()));
+                            },
+                            child: AlbumCard(
+                              label: "Away",
+                              image: AssetImage("assets/album03.jpg"),
+                            ),
                           ),
                           SizedBox(width: 20),
-                          AlbumCard(
-                            label: "Away",
-                            image: AssetImage("assets/album04.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumView()));
+                            },
+                            child: AlbumCard(
+                              label: "Room",
+                              image: AssetImage("assets/album04.jpg"),
+                            ),
                           ),
                           SizedBox(width: 20),
-                          AlbumCard(
-                            label: "Away",
-                            image: AssetImage("assets/top_50_Th.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumView()));
+                            },
+                            child: AlbumCard(
+                              label: "Top 50 Thailand",
+                              image: AssetImage("assets/top_50_Th.jpg"),
+                            ),
                           ),
                           SizedBox(width: 20),
-                          AlbumCard(
-                            label: "Away",
-                            image: AssetImage("assets/top_50_global.jpg"),
+                          GestureDetector(
+                            onDoubleTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumView()));
+                            },
+                            child: AlbumCard(
+                              label: "Top 50 Global",
+                              image: AssetImage("assets/top_50_global.jpg"),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: 32),
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(6.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -118,7 +153,7 @@ class _HomepageState extends State<Homepage> {
                                 label: "The Iron sea",
                                 image: AssetImage("assets/album_theironsea.jpg"),
                               ),
-                              SizedBox(width: 16),
+                              SizedBox(width: 12),
                               RowAlbumCard(
                                 label: "Ocean",
                                 image: AssetImage("assets/album_ocean.jpg"),
@@ -132,7 +167,7 @@ class _HomepageState extends State<Homepage> {
                                 label: "The Sky",
                                 image: AssetImage("assets/album_sky.jpg"),
                               ),
-                              SizedBox(width: 16),
+                              SizedBox(width: 12),
                               RowAlbumCard(
                                 label: "Sunset",
                                 image: AssetImage("assets/album_sunset.jpg"),
@@ -146,7 +181,7 @@ class _HomepageState extends State<Homepage> {
                                 label: "BF",
                                 image: AssetImage("assets/album_f1.jpg"),
                               ),
-                              SizedBox(width: 16),
+                              SizedBox(width: 12),
                               RowAlbumCard(
                                 label: "Feat",
                                 image: AssetImage("assets/album_f2.jpg"),
