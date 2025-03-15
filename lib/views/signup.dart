@@ -5,11 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../views/loginPage.dart';
 import '../components/my_textfield.dart';
 import 'package:projectapp/components/my_button.dart' as btn;
+import './welcome.dart';
 
-class Signup extends StatelessWidget {
-  Signup({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
-  // Controllers
+  @override
+  _SignupState createState() => _SignupState();
+}
+
+class _SignupState extends State<Signup> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();

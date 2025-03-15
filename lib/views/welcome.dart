@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:projectapp/views/homePage.dart';
+import 'package:projectapp/views/signup.dart';
 import 'profile.dart';
 
 class WelcomePage extends StatefulWidget {
-  final String? uid;
+  final String? uid; // รับ uid จาก Signup
   const WelcomePage({super.key, this.uid});
 
   @override
@@ -17,6 +19,7 @@ class _WelcomePageState extends State<WelcomePage> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
+  // ดึงข้อมูลผู้ใช้จาก Firestore ตาม UID ที่ได้รับ
   Future<Map<String, dynamic>?> fetchUserData(String uid) async {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("member").doc(uid).get();
@@ -29,6 +32,7 @@ class _WelcomePageState extends State<WelcomePage> {
     return null;
   }
 
+  // ฟังก์ชันสำหรับการล็อกอิน
   Future<void> loginUser(BuildContext context) async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -58,8 +62,9 @@ class _WelcomePageState extends State<WelcomePage> {
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Login failed. Please try again.";
-      if (e.code == 'user-not-found') errorMessage = "No user found with this email.";
-      else if (e.code == 'wrong-password') errorMessage = "Incorrect password.";
+      if (e.code == 'user-not-found') {
+        errorMessage = "No user found with this email.";
+      } else if (e.code == 'wrong-password') errorMessage = "Incorrect password.";
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(errorMessage),
@@ -89,7 +94,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
           ),
-
+          // ส่วนของ UI
           SingleChildScrollView(
             physics: BouncingScrollPhysics(),
             child: SafeArea(
@@ -102,36 +107,12 @@ class _WelcomePageState extends State<WelcomePage> {
                     children: [
                       Image.asset("assets/spotifyicon.png", width: 120, height: 120),
                       SizedBox(height: 50),
-                      Text(
-                        "Log in",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text("Log in", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                       SizedBox(height: 30),
-
-                      // ช่องกรอกอีเมล
-                      _buildTextField(
-                        controller: emailController,
-                        label: "Email",
-                        icon: Icons.email,
-                      ),
-
+                      _buildTextField(controller: emailController, label: "Email", icon: Icons.email),
                       SizedBox(height: 20),
-
-                      // ช่องกรอกรหัสผ่าน
-                      _buildTextField(
-                        controller: passwordController,
-                        label: "Password",
-                        icon: Icons.lock,
-                        obscureText: true,
-                      ),
-
+                      _buildTextField(controller: passwordController, label: "Password", icon: Icons.lock, obscureText: true),
                       SizedBox(height: 30),
-
-                      // ปุ่ม Continue
                       isLoading
                           ? CircularProgressIndicator()
                           : ElevatedButton(
@@ -139,27 +120,16 @@ class _WelcomePageState extends State<WelcomePage> {
                                 backgroundColor: Colors.tealAccent,
                                 foregroundColor: Colors.black,
                                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                               ),
                               onPressed: () => loginUser(context),
                               child: Text("Continue"),
                             ),
-
                       SizedBox(height: 20),
-
-                      // ปุ่มสมัครสมาชิก
                       TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, "/register");
-                        },
-                        child: Text(
-                          "Don't have an account? Sign up",
-                          style: TextStyle(color: Colors.tealAccent),
-                        ),
+                        onPressed: () =>Signup(),
+                        child: Text("Don't have an account? Sign up", style: TextStyle(color: Colors.tealAccent)),
                       ),
-
                       SizedBox(height: 50),
                     ],
                   ),
@@ -172,12 +142,7 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool obscureText = false,
-  }) {
+  Widget _buildTextField({required TextEditingController controller, required String label, required IconData icon, bool obscureText = false}) {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,

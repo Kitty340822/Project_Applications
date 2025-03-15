@@ -6,7 +6,7 @@ class SongCard extends StatelessWidget {
   final String label;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 140,
       child: Column(
         children: [
