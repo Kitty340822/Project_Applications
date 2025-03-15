@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:projectapp/navigations/tabbar.dart';
+import 'package:firebase_core/firebase_core.dart'; // ต้อง import เพื่อใช้ Firebase
+import 'package:projectapp/navigations/tabbar.dart'; // หน้า Tabbar ของคุณ
+import 'package:flutter_slidable/flutter_slidable.dart';
 
-void main(){
+void main() async {
+  // รอให้ Firebase initialization เสร็จสิ้นก่อนที่แอปจะเริ่ม
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Firebase Initialization
+
   runApp(MyWidget());
 }
+
 class MyWidget extends StatefulWidget {
   const MyWidget({super.key});
 
@@ -32,9 +38,9 @@ class _MyWidgetState extends State<MyWidget> {
           ),
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.white38, 
-        )
+        ),
       ),
-      home: Tabbar(),
+      home: Tabbar(), // หน้าหลักของคุณ
     );
   }
 }

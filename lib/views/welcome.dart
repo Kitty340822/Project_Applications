@@ -1,33 +1,88 @@
-import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:projectapp/main.dart';
-import '../components/my_textfield.dart';
-import './signup.dart';
-import 'package:projectapp/components/my_button.dart' as btn;
-import 'package:projectapp/components/square_tile.dart' as tile;
+import 'profile.dart';
 
-class WelcomePage extends StatelessWidget {
-  WelcomePage({super.key});
+class WelcomePage extends StatefulWidget {
+  final String? uid;
+  const WelcomePage({super.key, this.uid});
 
-  final usernameController = TextEditingController();
+  @override
+  _WelcomePageState createState() => _WelcomePageState();
+}
+
+class _WelcomePageState extends State<WelcomePage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  Future<Map<String, dynamic>?> fetchUserData(String uid) async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("member").doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.data() as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+    }
+    return null;
+  }
+
+  Future<void> loginUser(BuildContext context) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      String uid = userCredential.user!.uid;
+      Map<String, dynamic>? userData = await fetchUserData(uid);
+
+      if (userData != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Profile(userData: userData),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("User data not found in Firestore"),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "Login failed. Please try again.";
+      if (e.code == 'user-not-found') errorMessage = "No user found with this email.";
+      else if (e.code == 'wrong-password') errorMessage = "Incorrect password.";
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(errorMessage),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        alignment: Alignment.center,
         children: [
-          // พื้นหลัง
+          // พื้นหลังเหมือน Profile
           Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.teal[400]!,
+                  Color.fromARGB(240, 2, 173, 136),
                   Colors.black.withOpacity(0.9),
                   Colors.black.withOpacity(1),
                 ],
@@ -35,153 +90,110 @@ class WelcomePage extends StatelessWidget {
             ),
           ),
 
-          // Main Content
           SingleChildScrollView(
             physics: BouncingScrollPhysics(),
             child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                  
-                  // ปุ่มย้อนกลับ
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset("assets/spotifyicon.png", width: 120, height: 120),
+                      SizedBox(height: 50),
+                      Text(
+                        "Log in",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+
+                      // ช่องกรอกอีเมล
+                      _buildTextField(
+                        controller: emailController,
+                        label: "Email",
+                        icon: Icons.email,
+                      ),
+
+                      SizedBox(height: 20),
+
+                      // ช่องกรอกรหัสผ่าน
+                      _buildTextField(
+                        controller: passwordController,
+                        label: "Password",
+                        icon: Icons.lock,
+                        obscureText: true,
+                      ),
+
+                      SizedBox(height: 30),
+
+                      // ปุ่ม Continue
+                      isLoading
+                          ? CircularProgressIndicator()
+                          : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.tealAccent,
+                                foregroundColor: Colors.black,
+                                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: () => loginUser(context),
+                              child: Text("Continue"),
+                            ),
+
+                      SizedBox(height: 20),
+
+                      // ปุ่มสมัครสมาชิก
+                      TextButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => MyWidget()));
+                          Navigator.pushNamed(context, "/register");
                         },
-                      ),
-                    ),
-                  ),
-
-                  // หัวข้อ Login
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "Login By Email",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // ฟอร์มล็อกอิน
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            MyTextField(
-                              controller: usernameController,
-                              hintText: 'Email',
-                              obscureText: false,
-                            ),
-                            SizedBox(height: 20),
-
-                            // ปุ่ม Sign In
-                            btn.MyButton(
-                              label: ('Sign In'),
-                              onTap: () {
-                                if (_formKey.currentState!.validate()) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => Signup()),
-                                  );
-                                }
-                              },
-                            ),
-
-                            SizedBox(height: 20),
-
-                            // "Or"
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Divider(thickness: 0.5, color: Colors.grey[400]),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Text('Or', style: TextStyle(color: Colors.white, fontSize: 16)),
-                                ),
-                                Expanded(
-                                  child: Divider(thickness: 0.5, color: Colors.grey[400]),
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 20),
-
-                            // ปุ่ม Facebook, Google, Apple
-                            Column(
-                              children: [
-                                tile.SquareTile(imagePath: 'assets/google-logo.jpg', 
-                                title: "Continue with Facebook"),
-                                SizedBox(height: 10),
-                                tile.SquareTile(imagePath: 'assets/facebook.png',
-                                title: "Continue with Google"),
-                                SizedBox(height: 10),
-                                tile.SquareTile(imagePath: 'assets/apple.png', 
-                                title: "Continue with Apple"),
-                              ],
-                            ),
-                          ],
+                        child: Text(
+                          "Don't have an account? Sign up",
+                          style: TextStyle(color: Colors.tealAccent),
                         ),
                       ),
-                    ),
+
+                      SizedBox(height: 50),
+                    ],
                   ),
-
-                  SizedBox(height: 20),
-
-                  // Sign up + Forgot Password
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Signup()),
-                            );
-                          },
-                          child: const Text(
-                            "Don't have an account? Sign Up",
-                            style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        const Text(
-                          'Forgot Password?',
-                          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        filled: true,
+        fillColor: Colors.white10,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return "Please enter your $label";
+        return null;
+      },
     );
   }
 }

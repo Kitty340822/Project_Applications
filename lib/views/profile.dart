@@ -1,14 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:projectapp/navigations/tabbar.dart';
+import 'package:projectapp/views/homePage.dart';
 
 class Profile extends StatelessWidget {
-  const Profile({super.key});
+  final Map<String, dynamic>? userData; // ✅ เพิ่มพารามิเตอร์
 
+  const Profile({super.key, this.userData}); // ✅ แก้ไข constructor
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "No user logged in",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Profile"),
+        backgroundColor: Colors.teal[400],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.white),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) => Tabbar(),
+              ));
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
-          // พื้นหลังแบบเต็มจอ
+          // Background
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -17,7 +50,7 @@ class Profile extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromARGB(240, 2, 173, 136), // สีด้านบน
+                  Color.fromARGB(240, 2, 173, 136),
                   Colors.black.withOpacity(0.9),
                   Colors.black.withOpacity(1),
                 ],
@@ -25,7 +58,7 @@ class Profile extends StatelessWidget {
             ),
           ),
 
-          // เนื้อหาโปรไฟล์
+          // Profile content
           SafeArea(
             child: SingleChildScrollView(
               physics: BouncingScrollPhysics(),
@@ -36,92 +69,154 @@ class Profile extends StatelessWidget {
                   children: [
                     SizedBox(height: 20),
 
-                    // รูปภาพโปรไฟล์
+                    // Profile picture
                     CircleAvatar(
                       radius: 60,
-                      backgroundImage: AssetImage("assets/profile.jpeg"),
+                      backgroundImage: AssetImage("assets/person.jpeg"),
                     ),
                     SizedBox(height: 16),
 
-                    // ชื่อผู้ใช้
-                    Text(
-                      "John Doe",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 8),
+                    // User name from Firestore
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('member')
+                          .doc(user.uid) // ใช้ UID ของผู้ใช้ปัจจุบัน
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}',
+                              style: TextStyle(color: Colors.red));
+                        } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                          return Text('No profile data found',
+                              style: TextStyle(color: Colors.white));
+                        }
 
-                    // ปุ่มแก้ไขโปรไฟล์
+                        var data = snapshot.data!.data() as Map<String, dynamic>?;
+
+                        String name = data?['Name'] ?? 'No Name';
+                        String email = data?['Email'] ?? 'No Email';
+
+                        return Column(
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+
+                    SizedBox(height: 16),
+
+                    // Edit profile button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.tealAccent, // เปลี่ยนสีปุ่ม
+                        backgroundColor: Colors.tealAccent,
                         foregroundColor: Colors.black,
-                        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                       onPressed: () {
-                        // TODO: เพิ่มฟังก์ชันแก้ไขโปรไฟล์
+                        // TODO: เพิ่มหน้าแก้ไขโปรไฟล์
                       },
                       child: Text("Edit Profile"),
                     ),
+
                     SizedBox(height: 32),
 
-                    // ข้อมูลโปรไฟล์
+                    // Personal Info
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Personal Info",
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     SizedBox(height: 16),
 
-                    ProfileInfoTile(label: "Email", value: "john.doe@example.com"),
-                    ProfileInfoTile(label: "Phone", value: "+1 234 567 890"),
-                    ProfileInfoTile(label: "Location", value: "New York, USA"),
+                    // List of all members (ถ้าต้องการให้แสดงเฉพาะของผู้ใช้เอง ควรเปลี่ยน query)
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('member')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}',
+                              style: TextStyle(color: Colors.red));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.docs.isEmpty) {
+                          return Text(
+                            'No members found',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        }
 
-                    SizedBox(height: 50), // เพิ่มระยะห่างล่างสุด
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            var memberDoc = snapshot.data!.docs[index]
+                                as DocumentSnapshot<Map<String, dynamic>>;
+                            var memberData = memberDoc.data();
+
+                            if (memberData == null) return SizedBox();
+
+                            return Card(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: ListTile(
+                                title: Text(
+                                  memberData['Name'] ?? 'No Name',
+                                  style: TextStyle(
+                                    color: Colors.pink[800],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  memberData['Email'] ?? 'No Email',
+                                  style: TextStyle(color: Colors.pink[600]),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+
+                    SizedBox(height: 50),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Widget แสดงข้อมูลแต่ละรายการ
-class ProfileInfoTile extends StatelessWidget {
-  final String label;
-  final String value;
-  
-  const ProfileInfoTile({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(color: Colors.white70, fontSize: 18),
-          ),
-          Text(
-            value,
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),
