@@ -6,8 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.projectapp"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.example.music_player"
+    compileSdk = 35
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -20,9 +20,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.projectapp"
+        multiDexEnabled = true
+        applicationId = "com.example.music_player"
         minSdk = 23
-        targetSdk = 28
+        targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

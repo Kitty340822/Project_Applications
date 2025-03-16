@@ -1,4 +1,4 @@
-package com.example.projectapp
+package com.example.music_player;
 
 import io.flutter.embedding.android.FlutterActivity
 

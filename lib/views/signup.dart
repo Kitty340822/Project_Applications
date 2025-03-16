@@ -4,8 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../views/loginPage.dart';
 import '../components/my_textfield.dart';
-import 'package:projectapp/components/my_button.dart' as btn;
-import './welcome.dart';
+import '../components/my_button.dart' as btn;
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -21,54 +20,74 @@ class _SignupState extends State<Signup> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> saveToFirebase(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
-      String email = usernameController.text.trim();
-      String password = passwordController.text.trim();
-      String name = nameController.text.trim();
+  if (_formKey.currentState!.validate()) {
+    String email = usernameController.text.trim();
+    String password = passwordController.text.trim();
+    String name = nameController.text.trim();
 
-      if (email.isEmpty || password.isEmpty || name.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Please fill in all fields")),
-        );
-        return;
-      }
+    if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
+    }
 
-      try {
-        // ✅ สมัครสมาชิกกับ Firebase Authentication
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+    try {
+      // ✅ สมัครสมาชิกกับ Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-        // ✅ ดึง UID ของผู้ใช้ที่สร้างใหม่
-        String uid = userCredential.user!.uid;
+      // ✅ ดึง UID ของผู้ใช้ที่สร้างใหม่
+      String uid = userCredential.user!.uid;
 
-        // ✅ บันทึกข้อมูลลง Firestore (ใช้ UID เป็น doc ID)
-        await FirebaseFirestore.instance.collection("member").doc(uid).set({
-          "UID": uid,
-          "Email": email,
-          "Name": name,
-          "Password": password,
-        });
+      // ✅ บันทึกข้อมูลลง Firestore (ใช้ UID เป็น doc ID)
+      await FirebaseFirestore.instance.collection("member").doc(uid).set({
+        "UID": uid,
+        "email": email,
+        "name": name,
+        "Password": password,
+      });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signup successful!")),
-        );
+      // ✅ เพิ่มข้อมูลผู้ใช้ลงใน members collection
+      await addUserToMembers();  // เรียกใช้ฟังก์ชันนี้ที่นี่
 
-        // ✅ ส่งไปหน้า LoginPage พร้อมกับ UID
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoginPage(uid: uid),
-          ),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signup successful!")),
+      );
+
+      // ✅ ส่งไปหน้า LoginPage พร้อมกับ UID
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginPage(uid: uid),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
   }
+}
+Future<void> addUserToMembers() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    String userId = user.uid;
+    String name = nameController.text.trim(); // ใช้ชื่อจากฟอร์มสมัคร
+
+    CollectionReference members = FirebaseFirestore.instance.collection('member');
+
+    // เพิ่มข้อมูลผู้ใช้ใหม่ใน members collection
+    await members.doc(userId).set({
+      'name': name,
+      'email': user.email,
+      'createdAt': FieldValue.serverTimestamp(),
+      'playlist': []  // เพิ่มข้อมูล playlist ว่าง ๆ ให้กับผู้ใช้
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.5.4
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,13 +31,15 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_slidable: ^4.0.0
-  cloud_firestore: ^5.6.5
+  just_audio: ^0.9.46
+  provider: ^6.1.2
+  firebase_core: ^3.12.1
   firebase_auth: ^5.5.1
-  google_sign_in: ^6.3.0
+  cloud_firestore: ^5.6.5
   flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
@@ -49,7 +51,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -64,31 +66,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/album01.jpg
-    - assets/album02.jpg
-    - assets/album03.jpg
-    - assets/album04.jpg
-    - assets/album_dance.jpg
-    - assets/album_sea.jpg
-    - assets/top_50_Th.jpg
-    - assets/top_50_global.jpg
-    - assets/album_chill.jpg
-    - assets/album_theironsea.jpg
-    - assets/album_ocean.jpg
-    - assets/album_sunset.jpg
-    - assets/album_sky.jpg
-    - assets/album_youandmewithsky.jpg
-    - assets/album_heartclouds.jpg
-    - assets/album_f1.jpg
-    - assets/album_f2.jpg
-    - assets/album_f3.jpg
-    - assets/album_underthesea.jpg
-    - assets/google-logo.jpg
-    - assets/facebook.png
-    - assets/apple.png
-    - assets/person.jpeg
-    - assets/spotifyicon.png
-  #   - images/a_dot_burr.jpeg
+    - assets/images/
+    - assets/videos/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -116,9 +95,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-flutter_icons:
+t:
   android: true
-  ios: true
-  image_path: "assets/spotifyicon.png" # เปลี่ยนเป็นที่อยู่ของไอคอนของคุณ
-  adaptive_icon_background: "#ffffff" # สีพื้นหลังของไอคอน (Android Adaptive Icons)
-  adaptive_icon_foreground: "assets/spotifyicon.png" # ไอคอนของคุณ (Android Adaptive Icons)
+  image_path: "assets/images/spotifyicon.png"

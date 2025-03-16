@@ -6,20 +6,28 @@ class SongCard extends StatelessWidget {
   final String label;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      
       width: 140,
       child: Column(
         children: [
-          Image(image: image,
-          width: 140,
-          height: 140,
+         ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image(image: image),
           ),
-          Text(label ,
-          style: Theme.of(context).textTheme.bodySmall,
-          softWrap: true,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          ),
+          SizedBox(height: 5,),
+           Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              
+              color: Colors.grey,
+              
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          
+        ),
         ],
       ),
     );

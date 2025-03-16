@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'profile.dart';
+import 'package:projectapp/navigations/tabbar.dart';
+import 'package:projectapp/views/signup.dart';
+
 
 class LoginPage extends StatefulWidget {
   final String? uid;
@@ -19,7 +21,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<Map<String, dynamic>?> fetchUserData(String uid) async {
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("member").doc(uid).get();
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection("member").doc(uid).get();
       if (userDoc.exists) {
         return userDoc.data() as Map<String, dynamic>;
       }
@@ -35,7 +38,8 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => isLoading = true);
 
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
@@ -47,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Profile(userData: userData),
+            builder: (context) => Tabbar(),
           ),
         );
       } else {
@@ -60,7 +64,8 @@ class _LoginPageState extends State<LoginPage> {
       String errorMessage = "Login failed. Please try again.";
       if (e.code == 'user-not-found') {
         errorMessage = "No user found with this email.";
-      } else if (e.code == 'wrong-password') errorMessage = "Incorrect password.";
+      } else if (e.code == 'wrong-password')
+        errorMessage = "Incorrect password.";
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(errorMessage),
@@ -91,77 +96,114 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 50),
-                      Text(
-                        "Log in",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
+          Center(
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 50),
+                        Text(
+                          "Log in",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 30),
-
-                      // ช่องกรอกอีเมล
-                      _buildTextField(
-                        controller: emailController,
-                        label: "Email",
-                        icon: Icons.email,
-                      ),
-
-                      SizedBox(height: 20),
-
-                      // ช่องกรอกรหัสผ่าน
-                      _buildTextField(
-                        controller: passwordController,
-                        label: "Password",
-                        icon: Icons.lock,
-                        obscureText: true,
-                      ),
-
-                      SizedBox(height: 30),
-
-                      // ปุ่ม Continue
-                      isLoading
-                          ? CircularProgressIndicator()
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.tealAccent,
-                                foregroundColor: Colors.black,
-                                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
+                        SizedBox(height: 30),
+            
+                        // ช่องกรอกอีเมล
+                        _buildTextField(
+                          controller: emailController,
+                          label: "Email",
+                          icon: Icons.email,
+                        ),
+            
+                        SizedBox(height: 20),
+            
+                        // ช่องกรอกรหัสผ่าน
+                        _buildTextField(
+                          controller: passwordController,
+                          label: "Password",
+                          icon: Icons.lock,
+                          obscureText: true,
+                        ),
+            
+                        SizedBox(height: 30),
+            
+                        // ปุ่ม Continue
+                        isLoading
+                            ? CircularProgressIndicator()
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.tealAccent,
+                                  foregroundColor: Colors.black,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 32, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
                                 ),
+                                onPressed: () => loginUser(context),
+                                child: Text("Continue"),
                               ),
-                              onPressed: () => loginUser(context),
-                              child: Text("Continue"),
+            
+                        SizedBox(height: 20),
+            
+                        // ปุ่มสมัครสมาชิก
+                         Padding(
+                           padding: const EdgeInsets.only(left: 75.0),
+                           child: Row(
+                              children: [
+                                Text(
+                                  "Don't have an account?",
+                                  style: TextStyle(color: Colors.tealAccent),
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                GestureDetector(
+                                  onTap:  () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        Signup()), // Make sure to use the correct syntax
+                              );
+                            },
+                                  child: Text(
+                                    "Sign up",
+                                    style: TextStyle(color: Colors.redAccent,fontSize: 18),
+                                  ),
+                                ),
+                              ],
                             ),
-
-                      SizedBox(height: 20),
-
-                      // ปุ่มสมัครสมาชิก
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, "/register");
-                        },
-                        child: Text(
-                          "Don't have an account? Sign up",
-                          style: TextStyle(color: Colors.tealAccent),
-                        ),
-                      ),
-
-                      SizedBox(height: 50),
-                    ],
+                         ),
+                        
+            
+                        SizedBox(height: 100),
+                        GestureDetector(
+                          onTap:(){
+                      
+                              Navigator.push(context,MaterialPageRoute(builder: (context)=>Tabbar()));
+                          } ,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.arrow_back,size: 50,),
+                              SizedBox(width: 10,),
+                              Text('Back to Music')
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
