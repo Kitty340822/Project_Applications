@@ -187,9 +187,9 @@ class PlaylistProvider extends ChangeNotifier {
       await _audioPlayer.stop();
       // ถ้าใช้ setAsset() ให้ตรวจสอบว่า path อยู่ใน assets
       if (path.startsWith('assets/')) {
-        await _audioPlayer.setAsset(path); // ใช้สำหรับไฟล์ใน assets
+        await _audioPlayer.setAsset(path);
       } else {
-        await _audioPlayer.setUrl(path); // ใช้สำหรับไฟล์จาก URL หรือจากที่อื่น
+        await _audioPlayer.setUrl(path);
       }
       await _audioPlayer.play();
       _isPlaying = true;
